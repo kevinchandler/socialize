@@ -6,7 +6,7 @@ class RedditCrawlerJob < ActiveJob::Base
   queue_as :default
 
   def perform
-    url = Source.reddit
+    url = Source.reddit.url
     usernames = crawl_for_usernames(url)
 
     usernames.each { |un| create_user(un) }
