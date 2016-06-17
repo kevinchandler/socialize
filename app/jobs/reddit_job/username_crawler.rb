@@ -1,4 +1,4 @@
-class RedditCrawlerJob < ActiveJob::Base
+class RedditJob::UsernameCrawler < ActiveJob::Base
   include Sidekiq::Worker
   include Sidetiq::Schedulable
 
