@@ -14,6 +14,8 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
     username = user.username
     url = "https://reddit.com/u/#{username}.json"
     res = HTTParty.get(url)
+    return unless res && res['data'] && res['data']['children']
+
     res['data']['children'].each do |post|
       post = post['data']
       next unless post['author'] == username
