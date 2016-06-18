@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 20160617022538) do
     t.integer "source_id"
     t.text    "title"
     t.text    "body"
+    t.date    "date"
   end
 
   create_table "sources", force: :cascade do |t|

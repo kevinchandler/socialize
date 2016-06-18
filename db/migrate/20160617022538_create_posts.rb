@@ -5,6 +5,7 @@ class CreatePosts < ActiveRecord::Migration
       t.references :source
       t.text :title
       t.text :body
+      t.date :date
     end
   end
 end
