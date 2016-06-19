@@ -24,7 +24,8 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
         user: user,
         source: Source.reddit,
         body: post['body'],
-        date: Time.at(post['created'])
+        date: Time.at(post['created']),
+        identifier: -> { Digest::SHA1.hexdigest(post['body']) rescue nil }.call
       })
 
     end
