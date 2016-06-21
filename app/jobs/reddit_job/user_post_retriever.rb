@@ -20,7 +20,6 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
     res['data']['children'].each do |post|
       post = post['data']
       next unless (post['author'] == username) && post['body']
-      identifier = generate_identifier(post)
 
       begin
         Post.create({
@@ -29,7 +28,8 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
           title: post['title'],
           body: post['body'],
           date: Time.at(post['created']),
-          identifier: identifier
+          identifier: generate_identifier(post),
+          meta_info: "subreddit:#{post['subreddit']}"
         })
       rescue => e
         Airbrake.notify(e)

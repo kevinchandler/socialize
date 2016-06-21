@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160621013849) do
+ActiveRecord::Schema.define(version: 20160621040325) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,9 +24,11 @@ ActiveRecord::Schema.define(version: 20160621013849) do
     t.text    "body"
     t.date    "date"
     t.string  "identifier"
+    t.text    "meta_info"
   end
 
   add_index "posts", ["identifier"], name: "index_posts_on_identifier", using: :btree
+  add_index "posts", ["meta_info"], name: "index_posts_on_meta_info", using: :btree
   add_index "posts", ["title"], name: "index_posts_on_title", using: :btree
   add_index "posts", ["user_id"], name: "index_posts_on_user_id", using: :btree
 
