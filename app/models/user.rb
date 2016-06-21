@@ -3,6 +3,7 @@ class User < ActiveRecord::Base
   validates_presence_of [:username, :source, :first_encountered]
 
   has_many :posts
+  belongs_to :source
 
-  scope :reddit, -> { where(source: 'reddit') }
+  scope :reddit, -> { where(source: Source.reddit) }
 end

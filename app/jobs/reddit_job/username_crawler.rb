@@ -21,6 +21,6 @@ class RedditJob::UsernameCrawler < ActiveJob::Base
   end
 
   def create_user(username)
-    User.create({ username: username, source: 'reddit', first_encountered: Date.today })
+    User.create({ username: username, source: Source.reddit, first_encountered: Date.today })
   end
 end
