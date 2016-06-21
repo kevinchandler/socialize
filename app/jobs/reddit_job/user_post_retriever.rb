@@ -20,7 +20,7 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
       post = post['data']
       next unless post['author'] == username
       identifier = generate_identifier(post)
-      next if Post.find_by_identifier(identifier)
+      next if Post.where(identifier: identifier, user: user)
 
       Post.create({
         user: user,
