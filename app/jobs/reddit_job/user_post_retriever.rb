@@ -25,10 +25,15 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
         source: Source.reddit,
         body: post['body'],
         date: Time.at(post['created']),
-        identifier: -> { Digest::SHA1.hexdigest(post['body']) rescue nil }.call
+        identifier: generate_identifier(post)
       })
 
     end
+  end
+
+  def generate_identifier(post)
+    body = post['body'] || Time.now.to_s
+    Digest::SHA1.hexdigest(body)
   end
 
 end
