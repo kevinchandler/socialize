@@ -34,7 +34,7 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
 
     end
   rescue => e
-    # TODO
+    Airbrake.notify(e)
   end
 
   def generate_identifier(post)
