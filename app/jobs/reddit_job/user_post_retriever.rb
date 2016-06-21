@@ -36,6 +36,7 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
       end
 
     end
+  rescue URI::InvalidURIError => e
   rescue => e
     puts e
     Airbrake.notify(e)

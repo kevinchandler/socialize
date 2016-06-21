@@ -16,6 +16,7 @@ class RedditJob::UsernameCrawler < ActiveJob::Base
   def crawl_for_usernames(url)
     res = HTTParty.get(url)
     res['data']['children'].map { |post| post['data']['author'] }
+  rescue URI::InvalidURIError => e
   rescue => e
     Airbrake.notify(e)
   end
