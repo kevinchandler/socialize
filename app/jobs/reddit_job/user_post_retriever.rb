@@ -31,6 +31,8 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
       })
 
     end
+  rescue => e
+    # TODO
   end
 
   def generate_identifier(post)
