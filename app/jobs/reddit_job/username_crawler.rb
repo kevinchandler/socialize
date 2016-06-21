@@ -1,6 +1,7 @@
 class RedditJob::UsernameCrawler < ActiveJob::Base
   include Sidekiq::Worker
   include Sidetiq::Schedulable
+  sidekiq_options retry: false
 
   recurrence { minutely }
   queue_as :default
