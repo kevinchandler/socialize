@@ -19,17 +19,21 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
     return unless res && res['data'] && res['data']['children']
     res['data']['children'].each do |post|
       post = post['data']
-      next unless post['author'] == username
+      next unless (post['author'] == username) && post['body']
       identifier = generate_identifier(post)
-      
-      Post.create({
-        user: user,
-        source: Source.reddit,
-        title: post['title'],
-        body: post['body'],
-        date: Time.at(post['created']),
-        identifier: identifier
-      })
+
+      begin
+        Post.create({
+          user: user,
+          source: Source.reddit,
+          title: post['title'],
+          body: post['body'],
+          date: Time.at(post['created']),
+          identifier: identifier
+        })
+      rescue => e
+        Airbrake.notify(e)
+      end
 
     end
   rescue => e
