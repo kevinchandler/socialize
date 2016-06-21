@@ -8,7 +8,7 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
 
   def perform
     User.reddit.find_in_batches(batch_size: 5).each do |group|
-        group.each { |user| retrieve_post_info(user) }
+      group.each { |user| retrieve_post_info(user) }
     end
   end
 
@@ -17,12 +17,11 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
     url = "https://reddit.com/u/#{username}.json"
     res = HTTParty.get(url)
     return unless res && res['data'] && res['data']['children']
-
     res['data']['children'].each do |post|
       post = post['data']
       next unless post['author'] == username
       identifier = generate_identifier(post)
-      next if Post.where(identifier: identifier, user: user)
+      next if Post.where(identifier: identifier).any?
 
       Post.create({
         user: user,
@@ -34,12 +33,13 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
 
     end
   rescue => e
+    puts e
     Airbrake.notify(e)
   end
 
   def generate_identifier(post)
-    body = post['body'] || Time.now.to_s
-    Digest::SHA1.hexdigest(body)
+    hash = "#{post['author']}:#{post['title']}" || Time.now.to_s
+    Digest::SHA1.hexdigest(hash)
   end
 
 end
