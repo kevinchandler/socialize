@@ -21,11 +21,11 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
       post = post['data']
       next unless post['author'] == username
       identifier = generate_identifier(post)
-      next if Post.where(identifier: identifier).any?
-
+      
       Post.create({
         user: user,
         source: Source.reddit,
+        title: post['title'],
         body: post['body'],
         date: Time.at(post['created']),
         identifier: identifier
@@ -38,7 +38,7 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
   end
 
   def generate_identifier(post)
-    hash = "#{post['author']}:#{post['title']}" || Time.now.to_s
+    hash = post['body'] && "#{post['author']}:#{post['body']}" || Time.now.to_s
     Digest::SHA1.hexdigest(hash)
   end
 
