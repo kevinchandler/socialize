@@ -6,8 +6,9 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
   queue_as :default
 
   def perform
-    users = User.reddit
-    users.each { |user| retrieve_post_info(user) }
+    User.reddit.find_in_batches(batch_size: 5).each do |group|
+        group.each { |user| retrieve_post_info(user) }
+    end
   end
 
   def retrieve_post_info(user)
