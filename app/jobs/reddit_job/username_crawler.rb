@@ -8,9 +8,11 @@ class RedditJob::UsernameCrawler < ActiveJob::Base
 
   def perform
     url = Source.reddit.url
-    usernames = crawl_for_usernames(url)
-
-    usernames.each { |un| create_user(un) }
+    10.times do
+      usernames = crawl_for_usernames(url)
+      usernames.each { |un| create_user(un) }
+      sleep 1
+    end
   end
 
   def crawl_for_usernames(url)
