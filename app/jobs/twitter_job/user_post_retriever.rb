@@ -14,7 +14,8 @@ class TwitterJob::UserPostRetriever < ActiveJob::Base
     @source = Source.twitter
 
     User.all.find_in_batches(batch_size: 5).each do |group|
-      group.each { |user| retrieve_post_info(user) } unless rate_limited?
+      break if rate_limited?
+      group.each { |user| retrieve_post_info(user) }
     end
   end
 
