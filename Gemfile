@@ -8,6 +8,9 @@ gem 'redis'
 gem 'unicorn'
 gem 'airbrake', '~> 5.4'
 
+# sources
+gem 'twitter'
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.6'
 # Use SCSS for stylesheets
