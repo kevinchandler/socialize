@@ -6,4 +6,5 @@ class User < ActiveRecord::Base
   belongs_to :source
 
   scope :reddit, -> { where(source: Source.reddit) }
+  scope :twitter, -> { where(source: Source.twitter) }
 end
