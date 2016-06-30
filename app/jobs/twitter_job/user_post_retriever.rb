@@ -15,12 +15,14 @@ class TwitterJob::UserPostRetriever < ActiveJob::Base
 
     User.all.find_in_batches(batch_size: 5).each do |group|
       break if rate_limited?
-      group.each { |user| retrieve_post_info(user) }
+      group.each do |user|
+        next if user.posts.recently_created.any?;
+        retrieve_post_info(user)
+      end
     end
   end
 
   def retrieve_post_info(user)
-    next if user.posts.recently_created.any?
     timeline = @client.user_timeline(user.username)
 
     timeline.each do |tweet|
