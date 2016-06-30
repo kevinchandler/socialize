@@ -6,4 +6,6 @@ class Post < ActiveRecord::Base
 
   scope :reddit, -> { where(source: Source.reddit) }
   scope :twitter, -> { where(source: Source.twitter) }
+  scope :recently_created, -> { where('created_at >= ?', 3.days.ago) }
+
 end

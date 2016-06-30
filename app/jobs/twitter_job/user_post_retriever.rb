@@ -20,31 +20,30 @@ class TwitterJob::UserPostRetriever < ActiveJob::Base
   end
 
   def retrieve_post_info(user)
-    begin
-      timeline = @client.user_timeline user.username
+    next if user.posts.recently_created.any?
+    timeline = @client.user_timeline(user.username)
 
-      timeline.each do |tweet|
-        begin
-          next if tweet.retweet?
+    timeline.each do |tweet|
+      begin
+        next if tweet.retweet?
 
-          Post.create({
-            user: user,
-            source: @source,
-            body: tweet.full_text,
-            date: tweet.created_at,
-            identifier: tweet.id
-          })
-        rescue => e
-          Airbrake.notify(e)
-        end
+        Post.create({
+          user: user,
+          source: @source,
+          body: tweet.full_text,
+          date: tweet.created_at,
+          identifier: tweet.id
+        })
+      rescue => e
+        Airbrake.notify(e)
       end
-    rescue Twitter::Error::TooManyRequests => e
-      rate_limited(e)
-    rescue Twitter::Error::NotFound => e
-    rescue Twitter::Error::Unauthorized => e
-    rescue => e
-      Airbrake.notify(e)
     end
+  rescue Twitter::Error::TooManyRequests => e
+    rate_limited(e)
+  rescue Twitter::Error::NotFound => e
+  rescue Twitter::Error::Unauthorized => e
+  rescue => e
+    Airbrake.notify(e)
   end
 
   def rate_limited(e)
