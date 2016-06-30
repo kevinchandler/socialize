@@ -3,4 +3,7 @@ class Post < ActiveRecord::Base
   belongs_to :user
   validates_uniqueness_of :identifier, scope: [:source, :user]
   validates_presence_of :body
+
+  scope :reddit, -> { where(source: Source.reddit) }
+  scope :twitter, -> { where(source: Source.twitter) }
 end
