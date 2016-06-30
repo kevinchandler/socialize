@@ -24,6 +24,7 @@ class TwitterJob::UserPostRetriever < ActiveJob::Base
 
   def retrieve_post_info(user)
     timeline = @client.user_timeline(user.username)
+    init_user_for_source(user)
 
     timeline.each do |tweet|
       begin
@@ -46,6 +47,10 @@ class TwitterJob::UserPostRetriever < ActiveJob::Base
   rescue Twitter::Error::Unauthorized => e
   rescue => e
     Airbrake.notify(e)
+  end
+
+  def init_user_for_source(user)
+    User.where(username: user.username, source: @source).first_or_create!
   end
 
   def rate_limited(e)
