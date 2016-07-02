@@ -3,7 +3,6 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
   include Sidetiq::Schedulable
   sidekiq_options retry: false
 
-  # recurrence { hourly }
   queue_as :default
 
   def perform
