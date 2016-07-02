@@ -3,54 +3,53 @@ class TwitterJob::UserPostRetriever < ActiveJob::Base
   include Sidetiq::Schedulable
   sidekiq_options retry: false
 
-  # recurrence { hourly.minute_of_hour(0,10,20,30,40,50) }
   queue_as :default
 
+  MAX_TIMELINE_TWEETS = 200
 
-  def perform
-    return if rate_limited?
-
-    @client = TwitterClient
-    @source = Source.twitter
-
-    User.all.find_in_batches(batch_size: 5).each do |group|
-      break if rate_limited?
-      group.each do |user|
-        next if user.posts.recently_created.any?;
-        retrieve_post_info(user)
-      end
-    end
+  def perform(username)
+    return [] if rate_limited?
+    user_tweets = retrieve_post_info(username)
   end
 
-  def retrieve_post_info(user)
-    timeline = @client.user_timeline(user.username)
-    init_user_for_source(user)
+  def retrieve_post_info(username)
+    timeline = TwitterClient.user_timeline(username, { count: MAX_TIMELINE_TWEETS } )
+    user_tweets = []
 
     timeline.each do |tweet|
       begin
-        next if tweet.retweet?
-
-        Post.create({
-          user: user,
-          source: @source,
-          body: tweet.full_text,
-          date: tweet.created_at,
-          identifier: tweet.id
-        })
+        obj = {
+          tweet_text: tweet.full_text,
+          tweet_id: tweet.id,
+          is_retweet: tweet.retweet?,
+          reply_to_screenname: -> {
+            tweet.reply? ? tweet.reply_to_screenname.to_s : nil
+          }.call,
+          favorite_count: tweet.favorite_count,
+          retweet_count: tweet.retweet_count,
+          geo: -> {
+            tweet.geo? ? tweet.geo.to_s : nil
+          }.call,
+          metadata: -> {
+            tweet.metadata? ? tweet.metadata : nil
+          }.call,
+          date: tweet.created_at
+        }
+        user_tweets << obj
       rescue => e
         Airbrake.notify(e)
+        next
       end
     end
   rescue Twitter::Error::TooManyRequests => e
     rate_limited(e)
   rescue Twitter::Error::NotFound => e
+    # no posts found for user
   rescue Twitter::Error::Unauthorized => e
   rescue => e
     Airbrake.notify(e)
-  end
-
-  def init_user_for_source(user)
-    User.where(username: user.username, source: @source).first_or_create!
+  ensure
+    return user_tweets
   end
 
   def rate_limited(e)
