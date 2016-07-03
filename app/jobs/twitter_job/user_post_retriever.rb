@@ -23,7 +23,7 @@ class TwitterJob::UserPostRetriever < ActiveJob::Base
           text: tweet.full_text,
           is_retweet: tweet.retweet?,
           reply_to_screenname: -> {
-            tweet.reply? ? tweet.reply_to_screenname.to_s : nil
+            tweet.reply? ? tweet.in_reply_to_screen_name.to_s : nil
           }.call,
           favorite_count: tweet.favorite_count,
           retweet_count: tweet.retweet_count,
