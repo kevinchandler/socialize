@@ -19,8 +19,8 @@ class TwitterJob::UserPostRetriever < ActiveJob::Base
     timeline.each do |tweet|
       begin
         obj = {
-          tweet_text: tweet.full_text,
-          tweet_id: tweet.id,
+          id: tweet.id,
+          text: tweet.full_text,
           is_retweet: tweet.retweet?,
           reply_to_screenname: -> {
             tweet.reply? ? tweet.reply_to_screenname.to_s : nil

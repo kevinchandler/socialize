@@ -5,45 +5,35 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
 
   queue_as :default
 
-  def perform
-    User.reddit.find_in_batches(batch_size: 5).each do |group|
-      group.each { |user| retrieve_post_info(user) }
-    end
+  def perform(username)
+    retrieve_post_info(username)
   end
 
-  def retrieve_post_info(user)
-    username = user.username
+  def retrieve_post_info(username)
     url = "https://reddit.com/u/#{username}.json"
     res = HTTParty.get(url)
-    return unless res && res['data'] && res['data']['children']
+    binding.pry
+    user_posts = []
+    return user_posts unless res && res['data'] && res['data']['children']
     res['data']['children'].each do |post|
-      post = post['data']
-      next unless (post['author'] == username) && post['body']
-
       begin
-        Post.create({
-          user: user,
-          source: Source.reddit,
+        post = post['data']
+        next unless post['author'].downcase == username.downcase && post['body']
+
+        user_posts << {
+          username: username,
           title: post['title'],
           body: post['body'],
           date: Time.at(post['created']),
-          identifier: generate_identifier(post),
-          meta_info: "subreddit:#{post['subreddit']}"
-        })
+          subreddit: post['subreddit']
+        }
+      rescue URI::InvalidURIError => e
       rescue => e
+        puts e
         Airbrake.notify(e)
       end
-
     end
-  rescue URI::InvalidURIError => e
-  rescue => e
-    puts e
-    Airbrake.notify(e)
+  ensure
+    return user_posts
   end
-
-  def generate_identifier(post)
-    hash = post['body'] && "#{post['author']}:#{post['body']}" || Time.now.to_s
-    Digest::SHA1.hexdigest(hash)
-  end
-
 end
