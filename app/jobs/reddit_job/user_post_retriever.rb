@@ -12,7 +12,6 @@ class RedditJob::UserPostRetriever < ActiveJob::Base
   def retrieve_post_info(username)
     url = "https://reddit.com/u/#{username}.json"
     res = HTTParty.get(url)
-    binding.pry
     user_posts = []
     return user_posts unless res && res['data'] && res['data']['children']
     res['data']['children'].each do |post|
